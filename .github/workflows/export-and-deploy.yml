@@ -1,0 +1,49 @@
+name: Export and Deploy ML Model
+
+on:
+  push:
+    branches:
+      - main # или ветка, на которой ты работаешь с моделью
+
+jobs:
+  export-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # нужно, чтобы можно было переключаться между ветками
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/data/requirements.txt
+
+      - name: Run export_model.py
+        run: |
+          python scripts/export_model.py
+
+      - name: Switch to deploy branch
+        run: |
+          git fetch origin deploy || true
+          git checkout -B deploy origin/deploy || git checkout -b deploy
+
+      - name: Copy deploy to ml-spellfixer/
+        run: |
+          rm -rf ml-spellfixer  # чистим, если вдруг уже было
+          mkdir -p ml-spellfixer
+          cp -r deploy/* ml-spellfixer/
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add ml-spellfixer
+          git commit -m "Auto: export model and move to ml-spellfixer" || echo "Nothing to commit"
+          git push origin deploy
