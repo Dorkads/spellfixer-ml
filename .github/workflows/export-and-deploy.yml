@@ -34,25 +34,25 @@ jobs:
 
       - name: Copy export result temporarily (before checkout)
         run: |
-          mkdir -p tmp-ml-spellfixer
-          cp -r deploy/* tmp-ml-spellfixer/
+          mkdir -p tmp-ml_artifacts
+          cp -r deploy/* tmp-ml_artifacts/
 
       - name: Switch to deploy branch
         run: |
           git fetch origin deploy || true
           git checkout -B deploy origin/deploy || git checkout -b deploy
 
-      - name: Move copied files into ml-spellfixer
+      - name: Move copied files into ml_artifacts
         run: |
-          rm -rf ml-spellfixer
-          mkdir -p ml-spellfixer
-          cp -r tmp-ml-spellfixer/* ml-spellfixer/
+          rm -rf ml_artifacts
+          mkdir -p ml_artifacts
+          cp -r tmp-ml_artifacts/* ml_artifacts/
 
       - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add ml-spellfixer
-          git commit -m "Auto: export model and move to ml-spellfixer" || echo "Nothing to commit"
+          git add ml_artifacts
+          git commit -m "Auto: export model and move to ml_artifacts" || echo "Nothing to commit"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}
           git push origin deploy
