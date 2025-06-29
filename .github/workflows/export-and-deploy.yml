@@ -32,15 +32,21 @@ jobs:
           echo "Contents of deploy/"
           ls -la deploy || echo "deploy/ not found"
 
+      - name: Copy export result temporarily (before checkout)
+        run: |
+          mkdir -p tmp-ml-spellfixer
+          cp -r deploy/* tmp-ml-spellfixer/
+
       - name: Switch to deploy branch
         run: |
           git fetch origin deploy || true
           git checkout -B deploy origin/deploy || git checkout -b deploy
 
-      - name: Copy to ml-spellfixer
+      - name: Move copied files into ml-spellfixer
         run: |
+          rm -rf ml-spellfixer
           mkdir -p ml-spellfixer
-          cp -r deploy/* ml-spellfixer/
+          cp -r tmp-ml-spellfixer/* ml-spellfixer/
 
       - name: Commit and push
         run: |
