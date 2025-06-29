@@ -28,6 +28,15 @@ jobs:
       - name: Run export_model.py
         run: python scripts/export_model.py
 
+      - name: Debug check export result
+        run: |
+          echo "Working directory:"
+          pwd
+          echo "Contents here:"
+          ls -la
+          echo "deploy folder listing:"
+          ls -la deploy || echo "‼️ deploy/ not found"
+
       - name: Switch to deploy branch
         run: |
           git fetch origin deploy || true
