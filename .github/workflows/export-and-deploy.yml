@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main branch
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -26,17 +26,16 @@ jobs:
           pip install numpy pandas scikit-learn matplotlib seaborn joblib pyarrow wordcloud
 
       - name: Run export_model.py
-        run: |
-          python scripts/export_model.py
+        run: python scripts/export_model.py
 
       - name: Switch to deploy branch
         run: |
           git fetch origin deploy || true
           git checkout -B deploy origin/deploy || git checkout -b deploy
 
-      - name: Copy deploy to ml-spellfixer/
+      - name: Copy files to ml-spellfixer/
         run: |
-          rm -rf ml-spellfixer  # чистим, если вдруг уже было
+          rm -rf ml-spellfixer
           mkdir -p ml-spellfixer
           cp -r deploy/* ml-spellfixer/
 
@@ -46,4 +45,5 @@ jobs:
           git config user.email "github-actions@github.com"
           git add ml-spellfixer
           git commit -m "Auto: export model and move to ml-spellfixer" || echo "Nothing to commit"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}
           git push origin deploy
